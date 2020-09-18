@@ -366,7 +366,7 @@ class ConvolverFFTW(object):
             prevRightIFFTPlan = self.resultRightPreviousIFFTPlan(
                 self.resultRightFreqPrevious)
             prevRightIFFTPlan = prevRightIFFTPlan[self.block_size:self.block_size * 2]
-            self.outputRight = self.outputRight * self.crossFadeIn * \
+            self.outputRight = self.outputRight * self.crossFadeIn + \
                 prevRightIFFTPlan * self.crossFadeOut
 
         self.processCounter += 1
