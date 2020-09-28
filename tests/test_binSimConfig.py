@@ -10,5 +10,4 @@ class TestBinSimConfig(TestCase):
 
         for i, test_value in enumerate(inputs):
             output = parse_boolean(test_value)
-            self.assertEqual(output, expected_outputs[i], "i={}".format(i))
-
+            self.assertEqual(output, expected_outputs[i], f"i={i}")

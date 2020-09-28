@@ -21,4 +21,4 @@ def init_logging(loglevel):
 
 
 logger = init_logging(logging.INFO)
-logger.info("Starting pybinsim v{}".format(__version__))
+logger.info(f"Starting pybinsim v{__version__}")

@@ -95,8 +95,7 @@ class FilterStorage(object):
             filter_path = line_content[-1]
 
             if line.startswith('HPFILTER'):
-                self.log.info(
-                    "Loading headphone filter: {}".format(filter_path))
+                self.log.info(f"Loading headphone filter: {filter_path}")
                 self.headphone_filter = Filter(self.load_filter(
                     filter_path), self.ir_blocks, self.block_size)
                 continue
@@ -117,7 +116,7 @@ class FilterStorage(object):
         self.log.info("Start loading filters...")
 
         for i, (pose, filter_path) in enumerate(self.parse_filter_list()):
-            self.log.debug('Loading {}'.format(filter_path))
+            self.log.debug(f'Loading {filter_path}')
 
             loaded_filter = self.load_filter(filter_path)
             current_filter = Filter(
@@ -148,7 +147,7 @@ class FilterStorage(object):
                 self.log.info(f'   use file:: {result_filter.filename}')
             return result_filter
         else:
-            self.log.warning('Filter not found: key: {}'.format(key))
+            self.log.warning(f'Filter not found: key: {key}')
             return self.default_filter
 
     def close(self):

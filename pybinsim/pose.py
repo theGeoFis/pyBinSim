@@ -52,4 +52,4 @@ class Pose:
             return Pose(orientation, position, custom)
 
         raise RuntimeError(
-            "Unable to parse filter list: {}".format(filter_value_list))
+            f"Unable to parse filter list: {filter_value_list}")

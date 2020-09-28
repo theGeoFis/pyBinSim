@@ -106,8 +106,8 @@ class SoundHandler(object):
                 audio_file_data, fs = sf.read(self.soundPath, dtype='float32', )
                 assert fs == self.fs
 
-                self.log.debug("audio_file_data: {} MB".format(
-                    audio_file_data.nbytes // 1024 // 1024))
+                self.log.debug(
+                    f"audio_file_data: {audio_file_data.nbytes // 1024 // 1024} MB")
                 self.sound_file = np.asmatrix(audio_file_data)
 
                 # free data
@@ -124,21 +124,22 @@ class SoundHandler(object):
                     zeros = np.zeros(
                         (self.sound_file.shape[0], length_diff), dtype=np.float32)
 
-                    self.log.debug("Zeros size: {} Byte".format(zeros.nbytes))
-                    self.log.debug("Zeros shape: {} ({})".format(
-                        zeros.shape, zeros.dtype))
-                    self.log.debug("Soundfile size: {} MiB".format(
-                        self.sound_file.nbytes // 1024 // 1024))
-                    self.log.debug("Soundfile shape: {} ({})".format(
-                        self.sound_file.shape, self.sound_file.dtype))
+                    self.log.debug(f"Zeros size: {zeros.nbytes} Byte")
+                    self.log.debug(
+                        f"Zeros shape: {zeros.shape} ({zeros.dtype})")
+                    self.log.debug(
+                        f"Soundfile size: {self.sound_file.nbytes // 1024 // 1024} MiB")
+                    self.log.debug(
+                        f"Soundfile shape: {self.sound_file.shape} ({self.sound_file.dtype})")
+
                     self.sound_file = np.concatenate(
                         (self.sound_file, zeros),
                         1
                     )
-                    self.log.debug("Soundfile size after concat: {} MiB".format(
-                        self.sound_file.nbytes // 1024 // 1024))
                     self.log.debug(
-                        "Soundfile shape after concat: {} ({})".format(self.sound_file.shape, self.sound_file.dtype))
+                        f"Soundfile size after concat: {self.sound_file.nbytes // 1024 // 1024} MiB")
+                    self.log.debug(
+                        f"Soundfile shape after concat: {self.sound_file.shape} ({self.sound_file.dtype})")
                     self.log.info('Loaded new sound file\n')
                 self.new_sound_file_request = False
                 self.new_sound_file_loaded = True

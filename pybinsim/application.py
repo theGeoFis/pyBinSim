@@ -81,7 +81,7 @@ class BinSimConfig(object):
 
                     if boolean_config is None:
                         self.log.warning(
-                            "Cannot convert {} to bool. (key: {}".format(value, key))
+                            f"Cannot convert {value} to bool. (key: {key}")
 
                     self.configurationDict[key] = boolean_config
                 else:
@@ -130,8 +130,10 @@ class BinSim(object):
 
     def stream_start(self):
         self.log.info("BinSim: stream_start")
-        self.stream = self.p.open(format=pyaudio.paFloat32, channels=2,
-                                  rate=self.sampleRate, output=True,
+        self.stream = self.p.open(format=pyaudio.paFloat32,
+                                  channels=2,
+                                  rate=self.sampleRate,
+                                  output=True,
                                   frames_per_buffer=self.blockSize,
                                   stream_callback=audio_callback(self))
         self.stream.start_stream()
@@ -156,8 +158,10 @@ class BinSim(object):
         time.sleep(1)
 
         # Create SoundHandler
-        soundHandler = SoundHandler(self.blockSize, self.nChannels,
-                                    self.sampleRate, self.config.get('loopSound'))
+        soundHandler = SoundHandler(self.blockSize,
+                                    self.nChannels,
+                                    self.sampleRate,
+                                    self.config.get('loopSound'))
 
         soundfile_list = self.config.get('soundfile')
         soundHandler.request_new_sound_file(soundfile_list)
@@ -241,8 +245,9 @@ def audio_callback(binsim):
 
         # Finally apply Headphone Filter
         if callback.config.get('useHeadphoneFilter'):
-            binsim.result[:, 0], binsim.result[:,
-                                               1] = binsim.convolverHP.process(binsim.result)
+            hp_result = binsim.convolverHP.process(binsim.result)
+            binsim.result[:, 0] = hp_result[0]
+            binsim.result[:, 1] = hp_result[1]
 
         # Scale data
         binsim.result /= binsim.soundHandler.get_sound_channels() * 2
@@ -257,7 +262,8 @@ def audio_callback(binsim):
         if binsim.block.size < callback.config.get('blockSize'):
             pyaudio.paContinue = 1
 
-        return (binsim.result[:frame_count].tostring(), pyaudio.paContinue)
+        output_result = binsim.result[:frame_count].tostring()
+        return output_result, pyaudio.paContinue
 
     callback.config = binsim.config
 

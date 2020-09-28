@@ -76,8 +76,8 @@ class OscReceiver(object):
         #    args=(args+(0,)*6)[:6]
         #    print("filter value list incomplete")
 
-        self.log.info("Channel: {}".format(str(channel)))
-        self.log.info("Args: {}".format(str(args)))
+        self.log.info(f"Channel: {str(channel)}")
+        self.log.info(f"Args: {str(args)}")
 
         current_channel = channel
 
@@ -94,13 +94,13 @@ class OscReceiver(object):
         assert identifier == "/pyBinSimFile"
         # assert type(soundpath) == 'str'
 
-        self.log.info("soundPath: {}".format(soundpath))
+        self.log.info(f"soundPath: {soundpath}")
         self.soundFileList = soundpath
 
     def start_listening(self):
         """Start osc receiver in background Thread"""
 
-        self.log.info("Serving on {}".format(self.server.server_address))
+        self.log.info(f"Serving on {self.server.server_address}")
 
         osc_thread = threading.Thread(target=self.server.serve_forever)
         osc_thread.daemon = True
