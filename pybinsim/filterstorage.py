@@ -32,7 +32,7 @@ from pybinsim.utility import total_size
 nThreads = multiprocessing.cpu_count()
 
 
-class Filter(object):
+class Filter:
 
     def __init__(self, inputfilter, irBlocks, block_size, filename=None):
 
@@ -46,7 +46,7 @@ class Filter(object):
         return self.IR_left_blocked, self.IR_right_blocked
 
 
-class FilterStorage(object):
+class FilterStorage:
     """ Class for storing all filters mentioned in the filter list """
 
     def __init__(self, irSize, block_size, filter_list_name):

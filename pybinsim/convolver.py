@@ -33,7 +33,7 @@ import pyfftw
 nThreads = multiprocessing.cpu_count()
 
 
-class ConvolverFFTW(object):
+class ConvolverFFTW:
     """
     Class for convolving mono (usually for virtual sources) or stereo input (usually for HP compensation)
     with a BRIRsor HRTF

@@ -47,7 +47,7 @@ def parse_boolean(any_value):
     return None
 
 
-class BinSimConfig(object):
+class BinSimConfig:
     def __init__(self):
 
         self.log = logging.getLogger("pybinsim.BinSimConfig")
@@ -95,7 +95,7 @@ class BinSimConfig(object):
         return self.configurationDict[setting]
 
 
-class BinSim(object):
+class BinSim:
     """
     Main pyBinSim program logic
     """

@@ -89,7 +89,7 @@ def parse_sensor_reading(sensor_reading):
     return result_list
 
 
-class Spark9dof(object):
+class Spark9dof:
     """
     Class allows access to Yaw, Pitch, Roll Data of spark fun's 9DoF Board.
     """

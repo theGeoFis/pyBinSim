@@ -27,7 +27,7 @@ from pythonosc import dispatcher
 from pythonosc import osc_server
 
 
-class OscReceiver(object):
+class OscReceiver:
     """
     Class for receiving OSC Messages to control pyBinSim
     """

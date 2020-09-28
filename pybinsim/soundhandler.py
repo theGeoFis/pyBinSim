@@ -28,7 +28,7 @@ import numpy as np
 import soundfile as sf
 
 
-class SoundHandler(object):
+class SoundHandler:
     """ Class to read audio from files and serve it to pyBinSim """
 
     def __init__(self, block_size, n_channels, fs, loopSound):
