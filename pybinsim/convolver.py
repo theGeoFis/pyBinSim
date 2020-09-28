@@ -182,7 +182,7 @@ class ConvolverFFTW(object):
         """
         return self.processCounter
 
-    def transform_filter(self, filter):
+    def transform_filter(self, filter_):
         """
         Transform filter to freq domain
 
@@ -191,7 +191,7 @@ class ConvolverFFTW(object):
         """
 
         # Get blocked IRs
-        IR_left_blocked, IR_right_blocked = filter.getFilter()
+        IR_left_blocked, IR_right_blocked = filter_.getFilter()
 
         self.TF_left_blocked = np.zeros(
             [self.IR_blocks, self.block_size + 1], dtype='complex64')
@@ -204,7 +204,7 @@ class ConvolverFFTW(object):
             self.TF_right_blocked[ir_block_count] = self.filter_fftw_plan(
                 IR_right_blocked[ir_block_count])
 
-    def setIR(self, filter, do_interpolation):
+    def setIR(self, filter_, do_interpolation):
         """
         Hand over a new set of filters to the convolver
         and define if you want to perform an interpolation/crossfade
@@ -218,7 +218,7 @@ class ConvolverFFTW(object):
         self.TF_right_blocked_previous = self.TF_right_blocked
 
         # apply new filters
-        self.transform_filter(filter)
+        self.transform_filter(filter_)
 
         # Interpolation means cross fading the output blocks (linear interpolation)
         self.interpolate = do_interpolation
@@ -325,7 +325,7 @@ class ConvolverFFTW(object):
             # print('Convolver Stereo Processing')
             self.fill_buffer_stereo(block)
 
-        # Second: Multiplikation with IR block und accumulation with previous data
+        # Second: multiplication with IR block und accumulation with previous data
         for irBlockCount in range(0, self.IR_blocks):
             # Always convolute current filter
             self.resultLeftFreq[:] = self.multiply_and_add(irBlockCount,
