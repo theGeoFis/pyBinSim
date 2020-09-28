@@ -219,12 +219,12 @@ def audio_callback(binsim):
             binsim.soundHandler.request_new_sound_file(current_soundfile_list)
 
         # Get sound block. At least one convolver should exist
-        binsim.block[:binsim.soundHandler.get_sound_channels(
-        ), :] = binsim.soundHandler.buffer_read()
+        num_channels = binsim.soundHandler.get_sound_channels()
+        binsim.block[:num_channels, :] = binsim.soundHandler.buffer_read()
 
         # Update Filters and run each convolver with the current block
         do_crossfading = callback.config.get('enableCrossfading')
-        for n in range(binsim.soundHandler.get_sound_channels()):
+        for n in range(num_channels):
 
             # Get new Filter
             if binsim.oscReceiver.is_filter_update_necessary(n):
@@ -250,7 +250,8 @@ def audio_callback(binsim):
             binsim.result[:, 1] = hp_result[1]
 
         # Scale data
-        binsim.result /= binsim.soundHandler.get_sound_channels() * 2
+        if num_channels != 0:
+            binsim.result /= num_channels * 2
         binsim.result *= callback.config.get('loudnessFactor')
 
         if np.max(np.abs(binsim.result)) > 1:
