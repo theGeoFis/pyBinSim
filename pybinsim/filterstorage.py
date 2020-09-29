@@ -22,6 +22,7 @@
 
 import logging
 import multiprocessing
+from typing import Tuple, Iterator
 
 import numpy as np
 import soundfile as sf
@@ -34,7 +35,7 @@ nThreads = multiprocessing.cpu_count()
 
 class Filter:
 
-    def __init__(self, inputfilter, irBlocks, block_size, filename=None):
+    def __init__(self, inputfilter: np.ndarray, irBlocks:int, block_size:int, filename: str=None):
 
         self.IR_left_blocked = np.reshape(
             inputfilter[:, 0], (irBlocks, block_size))
@@ -42,14 +43,14 @@ class Filter:
             inputfilter[:, 1], (irBlocks, block_size))
         self.filename = filename
 
-    def getFilter(self):
+    def getFilter(self) -> Tuple[np.ndarray, np.ndarray]:
         return self.IR_left_blocked, self.IR_right_blocked
 
 
 class FilterStorage:
     """ Class for storing all filters mentioned in the filter list """
 
-    def __init__(self, irSize, block_size, filter_list_name):
+    def __init__(self, irSize: int, block_size: int, filter_list_name: str):
 
         self.log = logging.getLogger("pybinsim.FilterStorage")
         self.log.info("FilterStorage: init")
@@ -57,8 +58,8 @@ class FilterStorage:
         self.ir_size = irSize
         self.ir_blocks = irSize // block_size
         self.block_size = block_size
-        self.default_filter = Filter(
-            np.zeros((self.ir_size, 2), dtype='float32'), self.ir_blocks, self.block_size)
+        block = np.zeros((self.ir_size, 2), dtype=np.float32)
+        self.default_filter = Filter(block, self.ir_blocks, self.block_size)
 
         self.filter_list_path = filter_list_name
         self.filter_list = open(self.filter_list_path, 'r')
@@ -71,7 +72,7 @@ class FilterStorage:
         # Start to load filters
         self.load_filters()
 
-    def parse_filter_list(self):
+    def parse_filter_list(self) -> Iterator:
         """
         Generator for filter list lines
 
@@ -106,7 +107,7 @@ class FilterStorage:
 
             yield pose, filter_path
 
-    def load_filters(self):
+    def load_filters(self) -> None:
         """
         Load filters from files
 
@@ -129,7 +130,7 @@ class FilterStorage:
         self.log.info("Finished loading filters.")
         #self.log.info("filter_dict size: {}MiB".format(total_size(self.filter_dict) // 1024 // 1024))
 
-    def get_filter(self, pose):
+    def get_filter(self, pose: Pose):
         """
         Searches in the dict if key is available and return corresponding filter
         When no filter is found, defaultFilter is returned which results in silence
@@ -150,17 +151,17 @@ class FilterStorage:
             self.log.warning(f'Filter not found: key: {key}')
             return self.default_filter
 
-    def close(self):
+    def close(self) -> None:
         self.log.info('FilterStorage: close()')
         # TODO: do something in here?
 
-    def get_headphone_filter(self):
+    def get_headphone_filter(self) -> Filter:
         if self.headphone_filter is None:
             raise RuntimeError("Headphone filter not loaded")
 
         return self.headphone_filter
 
-    def load_filter(self, filter_path):
+    def load_filter(self, filter_path) -> None:
 
         current_filter, fs = sf.read(filter_path, dtype='float32')
 
@@ -169,8 +170,8 @@ class FilterStorage:
         # Fill filter with zeros if to short
         if filter_size[0] < self.ir_size:
             self.log.warning('Filter too short: Fill up with zeros')
-            current_filter = np.concatenate((current_filter, np.zeros(
-                (self.ir_size - filter_size[0], 2), np.float32)), 0)
+            appendix = np.zeros((self.ir_size - filter_size[0], 2), np.float32)
+            current_filter = np.concatenate((current_filter, appendix), 0)
         if filter_size[0] > self.ir_size:
             self.log.warning('Filter too long: shorten')
             current_filter = current_filter[:self.ir_size]

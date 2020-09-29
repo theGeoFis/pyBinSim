@@ -1,3 +1,5 @@
+from __future__ import annotations # used by forward declaration in Pose
+
 import logging
 from collections import namedtuple
 
@@ -22,14 +24,14 @@ class Pose:
         self.position = position
         self.custom = custom
 
-    def create_key(self):
+    def create_key(self) -> str:
         value_list = list(self.orientation) + \
             list(self.position) + list(self.custom)
 
         return ','.join([str(x) for x in value_list])
 
     @staticmethod
-    def from_filterValueList(filter_value_list):
+    def from_filterValueList(filter_value_list) -> Pose:
 
         # 'old' format: orientation - position
         if len(filter_value_list) == 6:

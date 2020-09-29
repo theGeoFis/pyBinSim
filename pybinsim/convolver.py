@@ -22,9 +22,10 @@
 
 import logging
 import multiprocessing
-import pickle
 from pathlib import Path
+import pickle
 from timeit import default_timer
+from typing import Tuple
 
 import numpy as np
 import pyfftw
@@ -39,7 +40,7 @@ class ConvolverFFTW:
     with a BRIRsor HRTF
     """
 
-    def __init__(self, ir_size, block_size, process_stereo):
+    def __init__(self, ir_size: int, block_size: int, process_stereo: bool):
         start = default_timer()
 
         self.log = logging.getLogger("pybinsim.ConvolverFFTW")
@@ -175,14 +176,14 @@ class ConvolverFFTW:
         delta = end - start
         self.log.info(f"Convolver: Finished Init (took {delta}s)")
 
-    def get_counter(self):
+    def get_counter(self) -> int:
         """
         Returns processing counter
         :return: processing counter
         """
         return self.processCounter
 
-    def transform_filter(self, filter_):
+    def transform_filter(self, filter_) -> None:
         """
         Transform filter to freq domain
 
@@ -204,7 +205,7 @@ class ConvolverFFTW:
             self.TF_right_blocked[ir_block_count] = self.filter_fftw_plan(
                 IR_right_blocked[ir_block_count])
 
-    def setIR(self, filter_, do_interpolation):
+    def setIR(self, filter_, do_interpolation: bool) -> None:
         """
         Hand over a new set of filters to the convolver
         and define if you want to perform an interpolation/crossfade
@@ -223,14 +224,14 @@ class ConvolverFFTW:
         # Interpolation means cross fading the output blocks (linear interpolation)
         self.interpolate = do_interpolation
 
-    def process_nothing(self):
+    def process_nothing(self) -> None:
         """
         Just for testing
         :return: None
         """
         self.processCounter += 1
 
-    def fill_buffer_mono(self, block):
+    def fill_buffer_mono(self, block: np.ndarray) -> None:
         """
         Copy mono soundblock to input Buffer;
         Transform to Freq. Domain and store result in FDLs
@@ -260,7 +261,7 @@ class ConvolverFFTW:
         self.FDL_left[:self.block_size + 1] = self.FDL_right[:self.block_size + 1] = self.bufferFftPlan(
             self.buffer)
 
-    def fill_buffer_stereo(self, block):
+    def fill_buffer_stereo(self, block: np.ndarray) -> None:
         """
         Copy stereo soundblock to input Buffer1 and Buffer2;
         Transform to Freq. Domain and store result in FDLs
@@ -293,14 +294,18 @@ class ConvolverFFTW:
             self.FDL_right = np.roll(self.FDL_right, self.block_size + 1)
 
         # transform buffer into freq domain and copy to FDLs
-        self.FDL_left[0:self.block_size + 1] = self.bufferFftPlan(self.buffer)
-        self.FDL_right[0:self.block_size +
-                       1] = self.buffer2FftPlan(self.buffer2)
+        self.FDL_left[:self.block_size + 1] = self.bufferFftPlan(self.buffer)
+        self.FDL_right[:self.block_size + 1] = self.buffer2FftPlan(self.buffer2)
 
-    def multiply_and_add(self, IR_block_count, result, input1, input2):
+    def multiply_and_add(self,
+                         IR_block_count: int,
+                         result: np.ndarray,
+                         input1: np.ndarray,
+                         input2: np.ndarray) -> np.ndarray:
 
         # Discard old data on the beginning of a new sound block
-        snippet2 = input2[(IR_block_count * (self.block_size + 1)):((IR_block_count + 1) * (self.block_size + 1))]
+        snippet2 = input2[(IR_block_count * (self.block_size + 1))
+                           :((IR_block_count + 1) * (self.block_size + 1))]
         if IR_block_count == 0:
             result = input1[IR_block_count]*snippet2
 
@@ -309,7 +314,7 @@ class ConvolverFFTW:
 
         return result
 
-    def process(self, block):
+    def process(self, block: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """
         Main function
 
@@ -326,7 +331,7 @@ class ConvolverFFTW:
             self.fill_buffer_stereo(block)
 
         # Second: multiplication with IR block und accumulation with previous data
-        for irBlockCount in range(0, self.IR_blocks):
+        for irBlockCount in range(self.IR_blocks):
             # Always convolute current filter
             self.resultLeftFreq[:] = self.multiply_and_add(irBlockCount,
                                                            self.resultLeftFreq,
@@ -374,6 +379,6 @@ class ConvolverFFTW:
 
         return self.outputLeft, self.outputRight
 
-    def close(self):
+    def close(self) -> None:
         print("Convolver: close")
         # TODO: do something here?

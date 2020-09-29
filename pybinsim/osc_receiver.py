@@ -22,9 +22,9 @@
 
 import logging
 import threading
+from typing import Tuple
 
-from pythonosc import dispatcher
-from pythonosc import osc_server
+from pythonosc import dispatcher, osc_server
 
 
 class OscReceiver:
@@ -58,7 +58,7 @@ class OscReceiver:
         self.server = osc_server.ThreadingOSCUDPServer(
             (self.ip, self.port), osc_dispatcher)
 
-    def handle_filter_input(self, identifier, channel, *args):
+    def handle_filter_input(self, identifier: str, channel, *args) -> None:
         """
         Handler for tracking information
 
@@ -88,7 +88,7 @@ class OscReceiver:
         else:
             self.log.info("same filter as before")
 
-    def handle_file_input(self, identifier, soundpath):
+    def handle_file_input(self, identifier: str, soundpath: str) -> None:
         """ Handler for playlist control"""
 
         assert identifier == "/pyBinSimFile"
@@ -97,7 +97,7 @@ class OscReceiver:
         self.log.info(f"soundPath: {soundpath}")
         self.soundFileList = soundpath
 
-    def start_listening(self):
+    def start_listening(self) -> None:
         """Start osc receiver in background Thread"""
 
         self.log.info(f"Serving on {self.server.server_address}")
@@ -106,25 +106,25 @@ class OscReceiver:
         osc_thread.daemon = True
         osc_thread.start()
 
-    def is_filter_update_necessary(self, channel):
+    def is_filter_update_necessary(self, channel) -> bool:
         """ Check if there is a new filter for channel """
         return self.filters_updated[channel]
 
-    def get_current_values(self, channel):
+    def get_current_values(self, channel) -> Tuple:
         """ Return key for filter """
         self.filters_updated[channel] = False
         return self.valueList[channel]
 
-    def get_sound_file_list(self):
+    def get_sound_file_list(self) -> str:
         ret_list = self.soundFileList
         self.soundFileList = ''
         return ret_list
 
-    def close(self):
+    def close(self) -> None:
         """
         Close the osc receiver
 
         :return: None
         """
-        self.log.info('oscReiver: close()')
+        self.log.info('oscReceiver: close()')
         self.server.shutdown()

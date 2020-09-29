@@ -64,8 +64,8 @@ class BinSimConfig:
                                   'samplingRate': 44100,
                                   'loopSound': True}
 
-    def read_from_file(self, filepath):
-        config = open(filepath, 'r')
+    def read_from_file(self, fn_config_file: str) -> None:
+        config = open(fn_config_file, 'r')
 
         for line in config:
             line_content = str.split(line)
@@ -91,7 +91,7 @@ class BinSimConfig:
             else:
                 self.log.warning('Entry ' + key + ' is unknown')
 
-    def get(self, setting):
+    def get(self, setting: str):
         return self.configurationDict[setting]
 
 
@@ -100,14 +100,14 @@ class BinSim:
     Main pyBinSim program logic
     """
 
-    def __init__(self, config_file):
+    def __init__(self, fn_config_file: str):
 
         self.log = logging.getLogger("pybinsim.BinSim")
         self.log.info("BinSim: init")
 
         # Read Configuration File
         self.config = BinSimConfig()
-        self.config.read_from_file(config_file)
+        self.config.read_from_file(fn_config_file)
 
         self.nChannels = self.config.get('maxChannels')
         self.sampleRate = self.config.get('samplingRate')
@@ -128,7 +128,7 @@ class BinSim:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.__cleanup()
 
-    def stream_start(self):
+    def stream_start(self) -> None:
         self.log.info("BinSim: stream_start")
         self.stream = self.p.open(format=pyaudio.paFloat32,
                                   channels=2,
@@ -181,17 +181,17 @@ class BinSim:
 
         return convolverHP, convolvers, filterStorage, oscReceiver, soundHandler
 
-    def close(self):
+    def close(self) -> None:
         self.log.info("BinSim: close")
         self.stream_close()
         self.p.terminate()
 
-    def stream_close(self):
+    def stream_close(self) -> None:
         self.log.info("BinSim: stream_close")
         self.stream.stop_stream()
         self.stream.close()
 
-    def __cleanup(self):
+    def __cleanup(self) -> None:
         # Close everything when BinSim is finished
         self.filterStorage.close()
         self.close()
@@ -206,13 +206,11 @@ class BinSim:
                 self.convolverHP.close()
 
 
-def audio_callback(binsim):
+def audio_callback(binsim: BinSim):
     """ Wrapper for callback to hand over custom data """
-    assert isinstance(binsim, BinSim)
 
-    # The pyAudio Callback
     def callback(in_data, frame_count, time_info, status):
-        # print("pyAudio callback")
+        # print("audio callback")
 
         current_soundfile_list = binsim.oscReceiver.get_sound_file_list()
         if current_soundfile_list:
@@ -225,15 +223,16 @@ def audio_callback(binsim):
         # Update Filters and run each convolver with the current block
         do_crossfading = callback.config.get('enableCrossfading')
         for n in range(num_channels):
+            convolver = binsim.convolvers[n]
 
             # Get new Filter
             if binsim.oscReceiver.is_filter_update_necessary(n):
                 filterValueList = binsim.oscReceiver.get_current_values(n)
                 pose = Pose.from_filterValueList(filterValueList)
                 filter_ = binsim.filterStorage.get_filter(pose)
-                binsim.convolvers[n].setIR(filter_, do_crossfading)
+                convolver.setIR(filter_, do_crossfading)
 
-            left, right = binsim.convolvers[n].process(binsim.block[n, :])
+            left, right = convolver.process(binsim.block[n, :])
 
             # Sum results from all convolvers
             if n == 0:
