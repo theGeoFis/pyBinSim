@@ -150,8 +150,7 @@ class BinSim:
 
         stream_callback = audio_callback(self)
 
-        spk = sc.get_speaker("Analog")
-        with spk.player(samplerate=self.sampleRate, blocksize=self.blockSize) as sp:
+        with self.speaker.player(samplerate=self.sampleRate, blocksize=self.blockSize) as sp:
             while True:
                 result = stream_callback(self.blockSize)
                 sp.play(result)
@@ -194,6 +193,13 @@ class BinSim:
             self.convolverHP = ConvolverFFTW(filter_size, self.blockSize, True)
             hpfilter = self.filterStorage.get_headphone_filter()
             self.convolverHP.setIR(hpfilter, False)
+
+        # initialize sound playback device
+        device_search_string = self.soundcard_config["device_search_string"]
+        if device_search_string is not None:
+            self.speaker = sc.get_speaker(device_search_string)
+        else:
+            self.speaker = sc.default_speaker()
 
     def __cleanup(self) -> None:
         # Close everything when BinSim is finished
