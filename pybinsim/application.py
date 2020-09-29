@@ -21,8 +21,10 @@
 # SOFTWARE.
 
 """ Module contains main loop and configuration of pyBinSim """
+import json
 import logging
 import time
+from pathlib import Path
 
 import numpy as np
 import soundcard as sc
@@ -54,16 +56,17 @@ class BinSimConfig:
         self.log = logging.getLogger("pybinsim.BinSimConfig")
 
         # Default Configuration
-        self.configurationDict = {'soundfile': '',
-                                  'blockSize': 256,
-                                  'filterSize': 16384,
-                                  'filterList': 'brirs/filter_list_kemar5.txt',
-                                  'enableCrossfading': False,
-                                  'useHeadphoneFilter': False,
-                                  'loudnessFactor': float(1),
-                                  'maxChannels': 8,
-                                  'samplingRate': 44100,
-                                  'loopSound': True}
+        self.configurationDict = {
+            'soundfile': '',
+            'filterSize': 16384,
+            'filterList': 'brirs/filter_list_kemar5.txt',
+            'enableCrossfading': False,
+            'useHeadphoneFilter': False,
+            'loudnessFactor': float(1),
+            'maxChannels': 8,
+            'samplingRate': 44100,
+            'loopSound': True
+        }
 
     def read_from_file(self, fn_config_file: str) -> None:
         config = open(fn_config_file, 'r')
@@ -110,9 +113,24 @@ class BinSim:
         self.config = BinSimConfig()
         self.config.read_from_file(fn_config_file)
 
+        # get device dependent sound card configuration
+        self.soundcard_config = {
+            'blockSize': 512,
+            "device_search_string": None
+        }
+
+        fn_sc_cfg = Path("soundcard-config.json")
+        if fn_sc_cfg.exists():
+            with open(fn_sc_cfg, "r") as sc_cfg:
+                loaded_config = json.load(sc_cfg)
+                self.soundcard_config = {
+                    **self.soundcard_config,
+                    **loaded_config
+                }
+
         self.nChannels = self.config.get('maxChannels')
         self.sampleRate = self.config.get('samplingRate')
-        self.blockSize = self.config.get('blockSize')
+        self.blockSize = self.soundcard_config['blockSize']
 
         self.result = None
         self.block = None
