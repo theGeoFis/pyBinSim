@@ -33,7 +33,7 @@ setup(
     install_requires=[
         "numpy",
         "ovr",
-        "pyaudio",
+        "soundcard",
         "pyfftw",
         "pyserial",
         "pytest",
