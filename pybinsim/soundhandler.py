@@ -102,7 +102,7 @@ class SoundHandler:
 
         while True:
             if self.new_sound_file_request:
-                self.log.info('Loading new sound file')
+                self.log.debug('Loading new sound file')
                 audio_file_data, fs = sf.read(self.soundPath, dtype='float32', )
                 assert fs == self.fs
 
@@ -140,7 +140,7 @@ class SoundHandler:
                         f"Soundfile size after concat: {self.sound_file.nbytes // 1024 // 1024} MiB")
                     self.log.debug(
                         f"Soundfile shape after concat: {self.sound_file.shape} ({self.sound_file.dtype})")
-                    self.log.info('Loaded new sound file\n')
+                    self.log.debug('Loaded new sound file\n')
                 self.new_sound_file_request = False
                 self.new_sound_file_loaded = True
             time.sleep(0.05)
