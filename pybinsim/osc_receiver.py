@@ -50,10 +50,13 @@ class OscReceiver(object):
         # self.valueList = [()] * self.maxChannels
         self.soundFileList = ''
         self.soundFileNew = False
+        self.soundevent = False
+        self.soundevent_data = []
 
         osc_dispatcher = dispatcher.Dispatcher()
         osc_dispatcher.map("/pyBinSim", self.handle_filter_input)
         osc_dispatcher.map("/pyBinSimFile", self.handle_file_input)
+        osc_dispatcher.map("/pyBinSimSoundevent", self.handle_soundevent)
 
         self.server = osc_server.ThreadingOSCUDPServer(
             (self.ip, self.port), osc_dispatcher)
@@ -97,6 +100,39 @@ class OscReceiver(object):
         self.log.info("soundPath: {}".format(soundpath))
         self.soundFileList = soundpath
 
+    def handle_soundevent(self, identifier, *args):
+        """ Handler for playlist control
+        
+        --
+        OSC message contains event id, a command and additional info (i.e. channel).
+        Possible commands are:
+            start: start soundevent; additional info (necessary) channel number
+            stop: stop soundevent;
+            pause: pause soundevent;
+            sendto: change channel of soundevent; additional info (necessary) channel number
+
+        --
+        example: 
+            shift sound 001 from current channel to channel 1:
+            client.send_message("/pyBinSimSoundevent", ["001", "sendto", 1])
+        """
+        assert identifier == "/pyBinSimSoundevent"
+
+        self.log.info("soundevent: {}".format(args))
+        self.soundevent_data = [args[0], args[1], args[2]]
+
+        self.soundevent = True
+
+    def new_soundevent_triggered(self):
+        """ Check if there is a new sound_event """
+        return self.soundevent
+
+    def get_soundevent_data(self):
+        """Get soundevent command and reset flag""" 
+        self.soundevent = False
+        print(self.soundevent_data)
+        return self.soundevent_data[0], self.soundevent_data[1], self.soundevent_data[2]
+
     def start_listening(self):
         """Start osc receiver in background Thread"""
 
@@ -128,3 +164,4 @@ class OscReceiver(object):
         """
         self.log.info('oscReiver: close()')
         self.server.shutdown()
+
