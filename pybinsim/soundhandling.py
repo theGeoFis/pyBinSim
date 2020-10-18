@@ -98,7 +98,7 @@ class SoundSceneHandler(object):
     def control_sound_event(self, event_data):
         key = event_data[0]
         command = event_data[1]
-        if event_data[2]:
+        if len(event_data) == 3:
             add_info = event_data[2]
         else:
             add_info = None
@@ -116,7 +116,7 @@ class SoundSceneHandler(object):
     
     def read_sound_files(self, sound_file_list):
         """load all files for the audio installation"""
-        sound_file_list = str.split(sound_file_list, '#')
+        sound_file_list = str.split(sound_file_list, ';')
         self.soundFileList = sound_file_list
         self.log.info("Audio Files: {}".format(str(self.soundFileList)))
 
