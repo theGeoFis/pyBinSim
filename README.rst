@@ -26,7 +26,7 @@ Create ``pyBinSimSettings.txt`` file with content like this
 
 ::
 
-    soundfile signals/test441kHz.wav
+    soundfile 002lIDsignals/test441kHz.wav;002sIDsignals/test2441kHz.wav;
     blockSize 512
     filterSize 16384
     filterList brirs/filter_list_kemar5.txt
@@ -57,14 +57,15 @@ Description
 Basic principle:
 ----------------
 
-Depending on the number of input channels (wave-file channels) the corresponding number of virtual sound sources is created. The filter for each sound source can selected and activitated via OSC messages. The messages basically contain the number
-index of the source for which the filter should be switched and an identifier string to address the correct filter. The correspondence between parameter value and filter is determined by a filter list which can be adjusted individually for the specific use case.
+Depending on the number of maxChannels the corresponding number of virtual sound sources is created. The filter for each sound source can selected and activitated via OSC messages. The messages basically contain the number
+index of the channel for which the filter should be switched and an identifier string to address the correct filter. The correspondence between parameter value and filter is determined by a filter list which can be adjusted individually for the specific use case. Furthermore OSC messages can be used to interact with the soundscene, for example by playing a sound on a certain channel. For this, the specified soundfiles are loaded into pybinsim as soundevents with specified ID's. 
     
 Config parameter description:
 -----------------------------
 
 soundfile: 
-    Defines \*.wav file which is played back at startup. Sound file can contain up to maxChannels audio channels. Also accepts multiple files separated by '#'; Example: 'soundfile signals/sound1.wav#signals/sound2.wav
+    Defines \000sID*.wav file which is played back at startup. Sound file can contain up to maxChannels audio channels. Also accepts multiple files separated by ';'; Example: 'soundfile signals/002lID_sound1.wav;001sID_signals/sound2.wav
+    The ID part contains a 3 dgit number as the actual ID and a type specifier "l" for looping sound and "s" for single sound. Single sounds are played only once (e.g. for pistol shots) and looping sounds are looped (e.g. for ambient sound), and can be paused and stopped via OSC (see the example).
 blockSize: 
     Number of samples which are processed per block. Low values reduce delay but increase cpu load.
 filterSize: 
@@ -95,25 +96,14 @@ To activate this filter for the third channel (counting starts at zero) for your
 
     /pyBinSim 2 165 2 0 0 0 0
         
-When you want to play another sound file you send:
 
+If you want to control the sound events, send
 ::
 
-    /pyBinSimFile folder/file_new.wav
+    /pyBinSimSoundevent/001/start/1
 
-Or a sound file list
-
-::
-
-    /pyBinSimFile folder/file_1.wav#folder/file_2.wav
-
+Where 001 is the sound ID, start is the command, and 1 is the channel number.
 The audiofile has to be located on the pc where pyBinSim runs. Files are not transmitted over network.
-
-
-Demos
------
-
-Check the https://github.com/pyBinSim/AppExamples repository for ready-to-use demos.
 
 
 
