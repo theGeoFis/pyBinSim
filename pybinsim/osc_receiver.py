@@ -119,7 +119,8 @@ class OscReceiver(object):
         assert identifier == "/pyBinSimSoundevent"
 
         self.log.info("soundevent: {}".format(args))
-        self.soundevent_data = [args[0], args[1], args[2]]
+        for data in args:
+            self.soundevent_data.append(data)
 
         self.soundevent = True
 
@@ -131,7 +132,8 @@ class OscReceiver(object):
         """Get soundevent command and reset flag""" 
         self.soundevent = False
         print(self.soundevent_data)
-        return self.soundevent_data[0], self.soundevent_data[1], self.soundevent_data[2]
+        # return self.soundevent_data[0], self.soundevent_data[1], self.soundevent_data[2]
+        return self.soundevent_data
 
     def start_listening(self):
         """Start osc receiver in background Thread"""
@@ -164,4 +166,3 @@ class OscReceiver(object):
         """
         self.log.info('oscReiver: close()')
         self.server.shutdown()
-
