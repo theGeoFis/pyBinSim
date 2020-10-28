@@ -84,8 +84,12 @@ class SoundSceneHandler(object):
         for sound in self.sound_events.values():
             if sound.is_running:
                 chunk = sound.request_chunk()
-                # print("Size: ", chunk.shape[0])
-                self.scene[sound.channel, :] = chunk
+                # Old:
+                # self.scene[sound.channel:sound.channel+sound.n_channels, :] = chunk
+
+                # New: now more additions are needed, but this is more conveniant for a multiprocessing approach
+                # Now the channelordering is done in sound_event
+                self.scene += chunk
         
         self.scene_chunk = self.scene
         self.scene_flush()
@@ -168,13 +172,16 @@ class SoundSceneHandler(object):
 class SoundEvent(object):
     """Storing sounds as events and interfacing with storage"""
     
-    def __init__(self, sound, id='000', type='l', chunk_size=0):
+    def __init__(self, sound, id='000', type='l', chunk_size=0, max_channels=1):
 
         self.sound_id = id
         self.is_running = False
         self.channel = 0 #placed on which channel
         self.channel_weight = 0 #two channels for phantom source
+        
+        self.max_channels = max_channels
         self.chunk_size = chunk_size
+        self.chunk = np.zeros([max_channels, chunk_size])
 
         if type == 'l':
             self.loopSound = True
@@ -206,19 +213,19 @@ class SoundEvent(object):
     def request_chunk(self):
 
         if (self.frame_count + 1) * self.chunk_size < self.sound.shape[1] and self.is_running:
-            chunk = self.sound[:, self.frame_count * self.chunk_size: (self.frame_count + 1) * self.chunk_size]
+            self.chunk[self.channel:self.channel+self.n_channels] = self.sound[:, self.frame_count * self.chunk_size: (self.frame_count + 1) * self.chunk_size]
             self.frame_count += 1
         elif self.loopSound and self.is_running:
-            chunk = self.sound[:, 0: self.chunk_size]
+            self.chunk[self.channel:self.channel+self.n_channels] = self.sound[:, 0: self.chunk_size]
             self.frame_count = 1
         elif self.is_running:
-            chunk = np.zeros([self.n_channels, self.chunk_size])
+            self.chunk = np.zeros([self.max_channels, self.chunk_size])
             self.frame_count = 0
             self.is_running = False
         else:
-            return None
+            self.chunk = np.zeros([self.max_channels, self.chunk_size])
 
-        return chunk
+        return self.chunk
 
     def place_sound(self, channel):
         self.channel = channel

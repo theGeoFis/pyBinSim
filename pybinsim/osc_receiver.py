@@ -131,9 +131,11 @@ class OscReceiver(object):
     def get_soundevent_data(self):
         """Get soundevent command and reset flag""" 
         self.soundevent = False
-        print(self.soundevent_data)
-        # return self.soundevent_data[0], self.soundevent_data[1], self.soundevent_data[2]
-        return self.soundevent_data
+
+        tx_soundevent_data = self.soundevent_data
+        self.soundevent_data = []
+
+        return tx_soundevent_data
 
     def start_listening(self):
         """Start osc receiver in background Thread"""
