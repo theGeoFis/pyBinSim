@@ -165,7 +165,7 @@ class SoundSceneHandler(object):
                     "Soundfile shape after concat: {} ({})".format(self.sound_file.shape, self.sound_file.dtype))
 
             #collect SoundEvent in dictionary
-            self.sound_events[key] = SoundEvent(self.sound_file, key, event_type, self.chunk_size)
+            self.sound_events[key] = SoundEvent(self.sound_file, key, event_type, self.chunk_size, self.n_channels)
             self.log.info('Loaded new sound file\n')
 
 
