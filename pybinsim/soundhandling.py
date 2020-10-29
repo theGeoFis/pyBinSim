@@ -81,15 +81,17 @@ class SoundSceneHandler(object):
 
     def request_chunk(self):
 
-        for sound in self.sound_events.values():
-            if sound.is_running:
-                chunk = sound.request_chunk()
-                # Old:
-                # self.scene[sound.channel:sound.channel+sound.n_channels, :] = chunk
+        # for sound in self.sound_events.values():
+        #     if sound.is_running:
+        #         chunk = sound.request_chunk()
+        #         # Old:
+        #         # self.scene[sound.channel:sound.channel+sound.n_channels, :] = chunk
 
-                # New: now more additions are needed, but this is more conveniant for a multiprocessing approach
-                # Now the channelordering is done in sound_event
-                self.scene += chunk
+        #         # New: now more additions are needed, but this is more conveniant for a multiprocessing approach
+        #         # Now the channelordering is done in sound_event
+        #         self.scene += chunk
+        chunks = list(map(lambda x:x.request_chunk(), self.sound_events))
+        self.scene = sum(chunks)        
         
         self.scene_chunk = self.scene
         self.scene_flush()
