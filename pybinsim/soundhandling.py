@@ -90,7 +90,7 @@ class SoundSceneHandler(object):
         #         # New: now more additions are needed, but this is more conveniant for a multiprocessing approach
         #         # Now the channelordering is done in sound_event
         #         self.scene += chunk
-        chunks = list(map(lambda x:x.request_chunk(), self.sound_events))
+        chunks = list(map(lambda x:x.request_chunk(), list(self.sound_events.values())))
         self.scene = sum(chunks)        
         
         self.scene_chunk = self.scene
